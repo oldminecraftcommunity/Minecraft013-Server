@@ -3,7 +3,7 @@ package net.skidcode.gh.server.block.impl;
 import net.skidcode.gh.server.block.Block;
 import net.skidcode.gh.server.block.base.PlantBlock;
 import net.skidcode.gh.server.block.material.Material;
-import net.skidcode.gh.server.utils.Logger;
+import net.skidcode.gh.server.player.Player;
 import net.skidcode.gh.server.utils.random.BedrockRandom;
 import net.skidcode.gh.server.world.World;
 
@@ -14,7 +14,13 @@ public class ReedsBlock extends PlantBlock{
 		this.isSolid = false;
 		Block.shouldTick[id] = true;
 	}
-	
+
+	@Override
+	public void onBlockPlacedByPlayer(World world, int x, int y, int z, int face, Player player) {
+		if(world.getBlockIDAt(x, y - 1, z) != Block.grass.blockID && world.getBlockIDAt(x, y - 1, z) != Block.dirt.blockID) return;
+		super.onBlockPlacedByPlayer(world, x, y, z, face, player);
+	}
+
 	public void tick(World world, int x, int y, int z, BedrockRandom random) {
 		//Logger.info(x+":"+y+":"+z+"  is"+this.blockID);
 		if(world.isAirBlock(x, y + 1, z)) {
@@ -44,4 +50,9 @@ public class ReedsBlock extends PlantBlock{
 		return world.getMaterial(x - 1, dY, z) == Material.water || world.getMaterial(x + 1, dY, z) == Material.water || world.getMaterial(x, dY, z - 1) == Material.water || world.getMaterial(x, dY, z + 1) == Material.water;
 	}
 
+	public void onNeighborBlockChanged(World world, int x, int y, int z, int meta) {
+		if(world.getBlockIDAt(x, y-1, z) != Block.grass.blockID && world.getBlockIDAt(x, y-1, z) != Block.dirt.blockID) {
+			world.setBlock(x, y, z, (byte)0, (byte)0, 3);
+		}
+	}
 }

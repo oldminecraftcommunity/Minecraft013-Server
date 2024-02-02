@@ -2,13 +2,7 @@ package net.skidcode.gh.server.console.command;
 
 import java.util.HashMap;
 
-import net.skidcode.gh.server.console.command.impl.BroadcastCommand;
-import net.skidcode.gh.server.console.command.impl.FillChunkCommand;
-import net.skidcode.gh.server.console.command.impl.HelpCommand;
-import net.skidcode.gh.server.console.command.impl.PlayerListCommand;
-import net.skidcode.gh.server.console.command.impl.StopCommand;
-import net.skidcode.gh.server.console.command.impl.TeleportCommand;
-import net.skidcode.gh.server.console.command.impl.TpsCommand;
+import net.skidcode.gh.server.console.command.impl.*;
 
 public abstract class CommandBase {
 	
@@ -33,6 +27,7 @@ public abstract class CommandBase {
 		addCommand(new FillChunkCommand("fillchunk"));
 		addCommand(new TpsCommand("tps"));
 		addCommand(new PlayerListCommand("playerlist"));
+		addCommand(new KickCommand("kick"));
 	}
 	
 }
