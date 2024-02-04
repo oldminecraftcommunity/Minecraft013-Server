@@ -32,7 +32,7 @@ public class Player extends Entity implements CommandIssuer{
 	public String ip, identifier, nickname = "";
 	public boolean firstChunkData = true;
 	public PlayerData playerdata;
-	
+	public boolean chunkDataSend[] = new boolean[256];
 	
 	public Player(String identifier, long clientID, String ip, int port) {
 		super();
@@ -120,7 +120,7 @@ public class Player extends Entity implements CommandIssuer{
 			case ProtocolInfo.REMOVE_BLOCK_PACKET:
 				RemoveBlockPacket rbp = (RemoveBlockPacket) dp;
 				this.world.placeBlockAndNotifyNearby(rbp.posX, rbp.posY, rbp.posZ, (byte)0, (byte)0);
-				this.world.broadcastPacketFromPlayer(rbp, this);
+				//this.world.broadcastPacketFromPlayer(rbp, this);
 				break;
 			case ProtocolInfo.PLACE_BLOCK_PACKET:
 				PlaceBlockPacket pbp = (PlaceBlockPacket) dp;
@@ -144,7 +144,12 @@ public class Player extends Entity implements CommandIssuer{
 				PlayerEquipmentPacket pep = (PlayerEquipmentPacket) dp;
 				if(pep.eid == this.eid) {
 					this.itemID = pep.itemID;
-					this.world.broadcastPacketFromPlayer(pep, this);
+					
+					
+					PlayerEquipmentPacket pepe = new PlayerEquipmentPacket(); //TODO fix
+					pepe.eid = this.eid;
+					pepe.itemID = this.itemID;
+					this.world.broadcastPacketFromPlayer(pepe, this);
 				}
 				break;
 			case ProtocolInfo.REQUEST_CHUNK_PACKET:
@@ -184,6 +189,7 @@ public class Player extends Entity implements CommandIssuer{
 				
 				cdp.data = cd; 
 				this.dataPacket(cdp);
+				this.chunkDataSend[(rcp.chunkX << 4) | rcp.chunkZ] = true;
 				break;
 			default:
 				Logger.warn("Unknown PID: "+dp.pid());
