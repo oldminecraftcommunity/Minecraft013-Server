@@ -16,6 +16,13 @@ public class LeavesBlock extends SolidBlock{
 	}
 	
 	public void tick(World world, int x, int y, int z, BedrockRandom random) {
-		
+		for(int x1 = x-4; x1 < x+5; x1++){
+			for(int z1 = z-4; z1 < z+5; z1++){
+				for(int y1 = y-4; y1 < y+5; y1++){
+					if(world.getBlockIDAt(x1, y1, z1) == Block.log.blockID) return;
+				}
+			}
+		}
+		world.placeBlockAndNotifyNearby(x, y, z, (byte)0);
 	}
 }
