@@ -16,28 +16,24 @@ public class GrassBlock extends SolidBlock{
 
 	@Override
 	public void tick(World world, int x, int y, int z, BedrockRandom random) {
-		if(!world.isAirBlock(x, y+1, z)
-				&& world.getBlockIDAt(x, y+1, z) != Block.glass.blockID
-				&& Block.blocks[world.getBlockIDAt(x, y+1, z)].isSolid) world.placeBlock(x, y, z, (byte)Block.dirt.blockID);
+		if(!canGrassGrow(world, x, y, z)) world.placeBlock(x, y, z, (byte)Block.dirt.blockID);
 
-		if(world.getBlockIDAt(x+1, y, z) == Block.dirt.blockID
-				&& (world.isAirBlock(x+1, y+1, z)
-				|| world.getBlockIDAt(x+1, y+1, z) == Block.glass.blockID
-				|| !Block.blocks[world.getBlockIDAt(x+1, y+1, z)].isSolid)) world.placeBlock(x+1, y, z, (byte)Block.grass.blockID);
-		if(world.getBlockIDAt(x-1, y, z) == Block.dirt.blockID
-				&& (world.isAirBlock(x-1, y+1, z)
-				|| world.getBlockIDAt(x-1, y+1, z) == Block.glass.blockID
-				|| !Block.blocks[world.getBlockIDAt(x-1, y+1, z)].isSolid)) world.placeBlock(x-1, y, z, (byte)Block.grass.blockID);
-		if(world.getBlockIDAt(x, y, z+1) == Block.dirt.blockID
-				&& (world.isAirBlock(x, y+1, z+1)
-				|| world.getBlockIDAt(x, y+1, z+1) == Block.glass.blockID
-				|| !Block.blocks[world.getBlockIDAt(x, y+1, z+1)].isSolid)) world.placeBlock(x, y, z+1, (byte)Block.grass.blockID);
-		if(world.getBlockIDAt(x, y, z-1) == Block.dirt.blockID
-				&& (world.isAirBlock(x, y+1, z-1)
-				|| world.getBlockIDAt(x, y+1, z-1) == Block.glass.blockID
-				|| !Block.blocks[world.getBlockIDAt(x, y+1, z-1)].isSolid)) world.placeBlock(x, y, z+1, (byte)Block.grass.blockID);
+		if(isDirt(world, x+1, y, z) && canGrassGrow(world, x+1, y, z)) world.placeBlock(x+1, y, z, (byte)Block.grass.blockID);
+		if(isDirt(world, x-1, y, z) && canGrassGrow(world, x-1, y, z)) world.placeBlock(x-1, y, z, (byte)Block.grass.blockID);
+		if(isDirt(world, x, y, z+1) && canGrassGrow(world, x, y, z+1)) world.placeBlock(x, y, z+1, (byte)Block.grass.blockID);
+		if(isDirt(world, x, y, z-1) && canGrassGrow(world, x, y, z-1)) world.placeBlock(x, y, z+1, (byte)Block.grass.blockID);
 
-		if(world.getBlockIDAt(x+1, y-1, z) == Block.dirt.blockID
+		if(isDirt(world, x+1, y-1, z) && canGrassGrow(world, x+1, y-1, z)) world.placeBlock(x+1, y-1, z, (byte)Block.grass.blockID);
+		if(isDirt(world, x-1, y-1, z) && canGrassGrow(world, x-1, y-1, z)) world.placeBlock(x-1, y-1, z, (byte)Block.grass.blockID);
+		if(isDirt(world, x, y-1, z+1) && canGrassGrow(world, x, y-1, z+1)) world.placeBlock(x, y-1, z+1, (byte)Block.grass.blockID);
+		if(isDirt(world, x, y-1, z-1) && canGrassGrow(world, x, y-1, z-1)) world.placeBlock(x, y-1, z+1, (byte)Block.grass.blockID);
+
+		if(isDirt(world, x+1, y+1, z) && canGrassGrow(world, x+1, y+1, z)) world.placeBlock(x+1, y+1, z, (byte)Block.grass.blockID);
+		if(isDirt(world, x-1, y+1, z) && canGrassGrow(world, x-1, y+1, z)) world.placeBlock(x-1, y+1, z, (byte)Block.grass.blockID);
+		if(isDirt(world, x, y+1, z+1) && canGrassGrow(world, x, y+1, z+1)) world.placeBlock(x, y+1, z+1, (byte)Block.grass.blockID);
+		if(isDirt(world, x, y+1, z-1) && canGrassGrow(world, x, y+1, z-1)) world.placeBlock(x, y+1, z+1, (byte)Block.grass.blockID);
+
+		/*if(world.getBlockIDAt(x+1, y-1, z) == Block.dirt.blockID
 				&& (world.isAirBlock(x+1, y, z)
 				|| world.getBlockIDAt(x+1, y, z) == Block.glass.blockID
 				|| !Block.blocks[world.getBlockIDAt(x+1, y, z)].isSolid)) world.placeBlock(x+1, y-1, z, (byte)Block.grass.blockID);
@@ -69,7 +65,19 @@ public class GrassBlock extends SolidBlock{
 		if(world.getBlockIDAt(x, y+1, z-1) == Block.dirt.blockID
 				&& (world.isAirBlock(x, y+2, z-1)
 				|| world.getBlockIDAt(x, y+2, z-1) == Block.glass.blockID
-				|| !Block.blocks[world.getBlockIDAt(x, y+2, z-1)].isSolid)) world.placeBlock(x, y+1, z+1, (byte)Block.grass.blockID);
+				|| !Block.blocks[world.getBlockIDAt(x, y+2, z-1)].isSolid)) world.placeBlock(x, y+1, z+1, (byte)Block.grass.blockID);*/
+	}
+
+	private boolean isDirt(World world, int x, int y, int z){
+		return world.getBlockIDAt(x, y, z) == Block.dirt.blockID;
+	}
+
+	private boolean canGrassGrow(World world, int x, int y, int z){
+		if(world.isAirBlock(x, y+1, z)
+				|| world.getBlockIDAt(x, y+1, z) == Block.glass.blockID
+				|| !Block.blocks[world.getBlockIDAt(x, y+1, z)].isSolid
+				&& !Block.blocks[world.getBlockIDAt(x, y+1, z)].material.isLiquid) return true;
+		else return false;
 	}
 
 }
