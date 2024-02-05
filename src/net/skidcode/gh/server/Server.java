@@ -24,6 +24,7 @@ import net.skidcode.gh.server.console.command.ConsoleIssuer;
 import net.skidcode.gh.server.event.EventRegistry;
 import net.skidcode.gh.server.event.server.ServerInitialized;
 import net.skidcode.gh.server.network.RakNetHandler;
+import net.skidcode.gh.server.other.Broadcaster;
 import net.skidcode.gh.server.player.Player;
 import net.skidcode.gh.server.plugin.Plugin;
 import net.skidcode.gh.server.plugin.PluginInfo;
@@ -277,6 +278,8 @@ public final class Server {
 	public static void run(){
 		ThreadConsole tc = new ThreadConsole();
 		tc.start();
+		Broadcaster br = new Broadcaster();
+		br.start();
 		while(Server.running) {
 			long tickTime = System.currentTimeMillis();
 			if(Server.nextTick - tickTime <= 0) {

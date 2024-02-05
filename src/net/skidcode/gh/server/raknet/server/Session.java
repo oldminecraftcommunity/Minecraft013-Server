@@ -73,6 +73,8 @@ public class Session {
 	private Map<Integer, EncapsulatedPacket> reliableWindow = new HashMap<>();
 	private int lastReliableIndex = -1;
 
+	private ArrayList<EncapsulatedPacket> scheducledPackets = new ArrayList<>();
+
 	public Session(SessionManager sessionManager, String address, int port) {
 		this.sessionManager = sessionManager;
 		this.address = address;
@@ -110,6 +112,14 @@ public class Session {
 
 			return;
 		}
+
+		synchronized(this.scheducledPackets) {
+			while(this.scheducledPackets.size() > 0) {
+				EncapsulatedPacket pk = this.scheducledPackets.remove(0);
+				this.addEncapsulatedToQueue(pk); //TODO priority?
+			}
+		}
+
 		this.isActive = false;
 
 		if (!this.ACKQueue.isEmpty()) {
@@ -245,6 +255,12 @@ public class Session {
 		addEncapsulatedToQueue(packet, RakNet.PRIORITY_NORMAL);
 	}
 
+	public void scheducleEncapsulated(EncapsulatedPacket packet) {
+		synchronized (this.scheducledPackets) {
+			this.scheducledPackets.add(packet);
+		}
+	}
+
 	public void addEncapsulatedToQueue(EncapsulatedPacket packet, int flags) throws Exception {
 		if ((packet.needACK = (flags & RakNet.FLAG_NEED_ACK) > 0)) {
 			this.needACK.put(packet.identifierACK, new HashMap<>());
@@ -299,9 +315,9 @@ public class Session {
 				return;
 			}
 			this.splitPackets.put(packet.splitID, new HashMap<Integer, EncapsulatedPacket>() {
-			{
-				put(packet.splitIndex, packet);
-			}});
+				{
+					put(packet.splitIndex, packet);
+				}});
 		} else {
 			this.splitPackets.get(packet.splitID).put(packet.splitIndex, packet);
 		}
@@ -500,7 +516,7 @@ public class Session {
 			if (packet instanceof UNCONNECTED_PING) {
 				UNCONNECTED_PONG pk = new UNCONNECTED_PONG();
 				pk.serverID = this.sessionManager.getID();
-				
+
 				pk.pingID = ((UNCONNECTED_PING) packet).pingID;
 				pk.serverName = Server.serverName;
 				this.sendPacket(pk);

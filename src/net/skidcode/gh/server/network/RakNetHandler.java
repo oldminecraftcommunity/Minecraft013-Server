@@ -10,26 +10,27 @@ import net.skidcode.gh.server.raknet.protocol.EncapsulatedPacket;
 import net.skidcode.gh.server.raknet.server.RakNetServer;
 import net.skidcode.gh.server.raknet.server.ServerHandler;
 import net.skidcode.gh.server.raknet.server.ServerInstance;
+import net.skidcode.gh.server.raknet.server.Session;
 import net.skidcode.gh.server.utils.Logger;
 
 public class RakNetHandler implements ServerInstance{
-	
+
 	public RakNetServer raknet;
 	public ServerHandler handler;
-	
+
 	public RakNetHandler() {
 		this.raknet = new RakNetServer(Server.getPort());
 		this.handler = new ServerHandler(raknet, this);
 	}
 
-    public void process() {
-        do{}while(this.handler.handlePacket());
-    }
-    
-    public void notifyShutdown() {
-    	this.raknet.shutdown();
-    }
-    
+	public void process() {
+		do{}while(this.handler.handlePacket());
+	}
+
+	public void notifyShutdown() {
+		this.raknet.shutdown();
+	}
+
 	@Override
 	public void openSession(String identifier, String address, int port, long clientID) {
 		Server.addPlayer(identifier, new Player(identifier, clientID, address, port));
@@ -52,18 +53,18 @@ public class RakNetHandler implements ServerInstance{
 			}
 		}
 	}
-	
+
 	public void sendPacket(Player player, MinecraftDataPacket packet) {
 		packet.buffer = new byte[packet.getSize()];
 		packet.encode();
 		EncapsulatedPacket pk = new EncapsulatedPacket();
 		pk.buffer = packet.getBuffer();
 		if (packet.channel != 0) {
-			packet.reliability = 3;
-			packet.orderChannel = packet.channel;
-			packet.orderIndex = 0;
+			pk.reliability = 3;
+			pk.orderChannel = packet.channel;
+			pk.orderIndex = 0;
 		} else {
-			packet.reliability = 2;
+			pk.reliability = 2;
 		}
 
 		/*if (needACK) {
@@ -72,16 +73,25 @@ public class RakNetHandler implements ServerInstance{
 			pk.identifierACK = iACK;
 			this.identifiersACK.put(identifier, iACK);
 		}*/ //TODO and check is neccessary
-		
+
 		EventRegistry.handleEvent(new DataPacketSend(player, packet));
 		try {
-			this.raknet.sessionManager.getSession(player.identifier).addEncapsulatedToQueue(pk);
+			Session s = this.raknet.sessionManager.getSession(player.identifier);
+			if(s != null) {
+				synchronized (s) {
+					s.scheducleEncapsulated(pk);
+				}
+			}else {
+				Logger.warn("Session is null??? "+player.nickname);
+			}
+
+
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
 		//this.handler.sendEncapsulated(player.identifier, pk, 0 | RakNet.PRIORITY_NORMAL);
 	}
-	
+
 	@Override
 	public void handleRaw(String address, int port, byte[] payload) {
 		EventRegistry.handleEvent(new RawPacketReceive(address, port, payload));
@@ -95,7 +105,7 @@ public class RakNetHandler implements ServerInstance{
 	@Override
 	public void handleOption(String option, String value) {
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public MinecraftDataPacket getPacket(EncapsulatedPacket packet) {
 		Class<MinecraftDataPacket> c = ProtocolInfo.packets[packet.buffer[0] & 0xff];
