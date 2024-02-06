@@ -274,7 +274,12 @@ public final class Server {
 		Logger.info(id+" has started a new session. Client ID: "+player.clientID+", EID: "+player.eid);
 		id2Player.put(id, player);
 	}
-	
+
+	public static void kickPlayer(Player player, String reason){
+		player.sendMessage("You have beed kicked, reason: "+reason);
+		Server.removePlayer(player.identifier);
+	}
+
 	public static void run(){
 		ThreadConsole tc = new ThreadConsole();
 		tc.start();

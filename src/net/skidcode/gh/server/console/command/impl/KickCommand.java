@@ -15,13 +15,12 @@ public class KickCommand extends CommandBase{
 
     @Override
     public String processCommand(CommandIssuer issuer, String... parameters) {
-        if(parameters.length < 2) return "Usage: /kick <player> <reason...>";
+        if(parameters.length < 1) return "Usage: /kick <player> <reason...>";
         Player p = Server.getPlayerByNickname(parameters[0]);
         if(p == null) return "Player is not found";
         if(parameters[1] == null) parameters[1] = "No reason.";
         String[] reason = Arrays.copyOfRange(parameters, 1, parameters.length);
-        p.sendMessage("You have beed kicked, reason: "+String.join(" ", reason));
-        Server.removePlayer(p.identifier);
+        Server.kickPlayer(p, String.join(" ", reason));
         return "";
     }
 }

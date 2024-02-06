@@ -3,8 +3,6 @@ package net.skidcode.gh.server.console.command.impl;
 import net.skidcode.gh.server.Server;
 import net.skidcode.gh.server.console.command.CommandBase;
 import net.skidcode.gh.server.console.command.CommandIssuer;
-import net.skidcode.gh.server.network.protocol.MessagePacket;
-import net.skidcode.gh.server.player.Player;
 import net.skidcode.gh.server.utils.Logger;
 
 public class BroadcastCommand extends CommandBase{
