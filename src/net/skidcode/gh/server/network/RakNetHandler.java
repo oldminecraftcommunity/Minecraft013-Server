@@ -14,23 +14,23 @@ import net.skidcode.gh.server.raknet.server.Session;
 import net.skidcode.gh.server.utils.Logger;
 
 public class RakNetHandler implements ServerInstance{
-
+	
 	public RakNetServer raknet;
 	public ServerHandler handler;
-
+	
 	public RakNetHandler() {
 		this.raknet = new RakNetServer(Server.getPort());
 		this.handler = new ServerHandler(raknet, this);
 	}
 
-	public void process() {
-		do{}while(this.handler.handlePacket());
-	}
-
-	public void notifyShutdown() {
-		this.raknet.shutdown();
-	}
-
+    public void process() {
+        do{}while(this.handler.handlePacket());
+    }
+    
+    public void notifyShutdown() {
+    	this.raknet.shutdown();
+    }
+    
 	@Override
 	public void openSession(String identifier, String address, int port, long clientID) {
 		Server.addPlayer(identifier, new Player(identifier, clientID, address, port));
@@ -53,7 +53,7 @@ public class RakNetHandler implements ServerInstance{
 			}
 		}
 	}
-
+	
 	public void sendPacket(Player player, MinecraftDataPacket packet) {
 		packet.buffer = new byte[packet.getSize()];
 		packet.encode();
@@ -73,7 +73,7 @@ public class RakNetHandler implements ServerInstance{
 			pk.identifierACK = iACK;
 			this.identifiersACK.put(identifier, iACK);
 		}*/ //TODO and check is neccessary
-
+		
 		EventRegistry.handleEvent(new DataPacketSend(player, packet));
 		try {
 			Session s = this.raknet.sessionManager.getSession(player.identifier);
@@ -84,14 +84,14 @@ public class RakNetHandler implements ServerInstance{
 			}else {
 				Logger.warn("Session is null??? "+player.nickname);
 			}
-
-
+			
+			
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
 		//this.handler.sendEncapsulated(player.identifier, pk, 0 | RakNet.PRIORITY_NORMAL);
 	}
-
+	
 	@Override
 	public void handleRaw(String address, int port, byte[] payload) {
 		EventRegistry.handleEvent(new RawPacketReceive(address, port, payload));
@@ -105,7 +105,7 @@ public class RakNetHandler implements ServerInstance{
 	@Override
 	public void handleOption(String option, String value) {
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public MinecraftDataPacket getPacket(EncapsulatedPacket packet) {
 		Class<MinecraftDataPacket> c = ProtocolInfo.packets[packet.buffer[0] & 0xff];

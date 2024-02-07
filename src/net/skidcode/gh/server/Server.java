@@ -24,7 +24,6 @@ import net.skidcode.gh.server.console.command.ConsoleIssuer;
 import net.skidcode.gh.server.event.EventRegistry;
 import net.skidcode.gh.server.event.server.ServerInitialized;
 import net.skidcode.gh.server.network.RakNetHandler;
-import net.skidcode.gh.server.other.Broadcaster;
 import net.skidcode.gh.server.player.Player;
 import net.skidcode.gh.server.plugin.Plugin;
 import net.skidcode.gh.server.plugin.PluginInfo;
@@ -274,17 +273,10 @@ public final class Server {
 		Logger.info(id+" has started a new session. Client ID: "+player.clientID+", EID: "+player.eid);
 		id2Player.put(id, player);
 	}
-
-	public static void kickPlayer(Player player, String reason){
-		player.sendMessage("You have beed kicked, reason: "+reason);
-		Server.removePlayer(player.identifier);
-	}
-
+	
 	public static void run(){
 		ThreadConsole tc = new ThreadConsole();
 		tc.start();
-		Broadcaster br = new Broadcaster();
-		br.start();
 		while(Server.running) {
 			long tickTime = System.currentTimeMillis();
 			if(Server.nextTick - tickTime <= 0) {

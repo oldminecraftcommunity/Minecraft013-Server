@@ -21,9 +21,6 @@ public class PlaceBlockPacket extends MinecraftDataPacket{
 		this.posY = this.getByte();
 		this.face = this.getByte();
 		this.id = this.getByte();
-		if(this.id == 7 || this.id == 8 || this.id == 9 || this.id == 10 || this.id == 11 || this.id == 51 || this.id == 95){
-			this.id = 1;
-		}
 	}
 
 	@Override

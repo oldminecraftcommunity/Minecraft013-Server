@@ -67,7 +67,6 @@ public class Player extends Entity implements CommandIssuer{
 	public void handlePacket(MinecraftDataPacket dp) {
 		
 		EventRegistry.handleEvent(new DataPacketReceive(this, dp));
-		//Logger.info(dp.pid());
 		switch(dp.pid()) {
 			case ProtocolInfo.MESSAGE_PACKET:
 				Server.broadcastMessage(this.nickname+" : "+(((MessagePacket)dp).message));
@@ -116,14 +115,6 @@ public class Player extends Entity implements CommandIssuer{
 					}
 				}
 				Logger.info("Player "+this.nickname+" joined the game. Position: "+this.posX+", "+this.posY+", "+this.posZ);
-				sendMessage("Welcome "+this.nickname+" to this server!");
-				sendMessage("There are "+Server.getPlayers().size()+" "+((Server.getPlayers().size() < 2) ? "player" : "players")+" online:\n");
-				String msg = "";
-				for(Player p : Server.getPlayers()){
-					msg+=p.nickname+", ";
-				}
-				if(!Server.getPlayers().isEmpty()) msg = msg.substring(0, msg.length()-2); else break;
-				sendMessage(msg);
 				break;
 			case ProtocolInfo.REMOVE_BLOCK_PACKET:
 				RemoveBlockPacket rbp = (RemoveBlockPacket) dp;
