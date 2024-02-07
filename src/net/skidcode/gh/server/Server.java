@@ -24,6 +24,7 @@ import net.skidcode.gh.server.console.command.ConsoleIssuer;
 import net.skidcode.gh.server.event.EventRegistry;
 import net.skidcode.gh.server.event.server.ServerInitialized;
 import net.skidcode.gh.server.network.RakNetHandler;
+import net.skidcode.gh.server.other.Broadcaster;
 import net.skidcode.gh.server.player.Player;
 import net.skidcode.gh.server.plugin.Plugin;
 import net.skidcode.gh.server.plugin.PluginInfo;
@@ -56,6 +57,9 @@ public final class Server {
 	public static volatile String serverName = "MCCPP;Demo;Minecraft 0.1.3 Server";
 	public static int stableTPS = 0;
 	public static long lastSecondRecorded = 0;
+	public static boolean autoBroadcast = true;
+	public static int broadcastInterval = 30;
+	public static int maxPlayers = 20;
 	
 	public static void stop() {
 		running = false;
@@ -90,6 +94,7 @@ public final class Server {
 		Logger.info("Loading properties...");
 		properties = new PropertiesFile("server.properties", new String[][] {
 			{"server-port", String.valueOf(Server.port)},
+			{"max-players", String.valueOf(Server.maxPlayers)},
 			{"save-world", String.valueOf(Server.saveWorld)},
 			{"save-player-data", String.valueOf(Server.savePlayerData)},
 			{"generate-world", "true"},
@@ -99,16 +104,21 @@ public final class Server {
 			{"max-mtu-size", String.valueOf(maxMTUSize)},
 			{"allow-from-different-port", String.valueOf(Server.allowFromDifferentPort)},
 			{"enable-terminal-colors", String.valueOf(Server.enableColors)},
-			{"send-full-chunks", String.valueOf(Server.sendFullChunks)}
+			{"send-full-chunks", String.valueOf(Server.sendFullChunks)},
+			{"auto-broadcast", "true"},
+			{"broadcast-interval", String.valueOf(Server.broadcastInterval)}
 		});
 		Server.enableColors = properties.getBoolean("enable-terminal-colors", Server.enableColors);
 		Server.serverName = properties.getString("server-name", Server.serverName);
 		Server.port = properties.getInteger("server-port", Server.port);
+		Server.maxPlayers = properties.getInteger("max-players", Server.maxPlayers);
 		Server.saveWorld = properties.getBoolean("save-world", Server.saveWorld);
 		Server.savePlayerData = properties.getBoolean("save-player-data", Server.savePlayerData);
 		Server.maxMTUSize = properties.getInteger("max-mtu-size", Server.maxMTUSize);
 		Server.allowFromDifferentPort = properties.getBoolean("allow-from-different-port", Server.allowFromDifferentPort);
-		Server.sendFullChunks = properties.getBoolean("send-full-chunks", (Server.sendFullChunks));
+		Server.sendFullChunks = properties.getBoolean("send-full-chunks", Server.sendFullChunks);
+		Server.autoBroadcast = properties.getBoolean("auto-broadcast", Server.autoBroadcast);
+		Server.broadcastInterval = properties.getInteger("broadcast-interval", Server.broadcastInterval);
 		Logger.info("Running server on port "+Server.port);
 		if(Server.port != 19132 && !Server.allowFromDifferentPort) {
 			Logger.warn("Server port is not default and clients are not allowed to connect from different port. Vanilla users may be not able to connect!");
@@ -277,6 +287,10 @@ public final class Server {
 	public static void run(){
 		ThreadConsole tc = new ThreadConsole();
 		tc.start();
+		if(autoBroadcast){
+			Broadcaster br = new Broadcaster();
+			br.start();
+		}
 		while(Server.running) {
 			long tickTime = System.currentTimeMillis();
 			if(Server.nextTick - tickTime <= 0) {

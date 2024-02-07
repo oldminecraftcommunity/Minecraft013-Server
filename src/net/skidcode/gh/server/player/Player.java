@@ -55,6 +55,7 @@ public class Player extends Entity implements CommandIssuer{
 	
 	public void onPlayerExit() {
 		try {
+			if(nickname.isEmpty()) return;
 			this.playerdata.save();
 		} catch (Exception e) {
 			Logger.error("Failed to save playerdata!");
@@ -75,6 +76,10 @@ public class Player extends Entity implements CommandIssuer{
 				LoginPacket loginpacket = (LoginPacket)dp;
 				if(Server.getPlayerByNickname(loginpacket.nickname) != null) {
 					Logger.info(String.format("%s was prevented to join because player with nickname %s is already in game.", this.identifier, loginpacket.nickname));
+					break;
+				}
+				if(Server.getPlayers().size() > Server.maxPlayers){
+					Logger.info(String.format("%s was prevented to join because server is too popular.", this.identifier));
 					break;
 				}
 				this.nickname = loginpacket.nickname;
